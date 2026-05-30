@@ -1,13 +1,1386 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal de História - 7.º Ano</title>
+  
+  <!-- CSS Tailwind via CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;505&display=swap" rel="stylesheet">
 
+  <!-- Lucide Icons & React Runtime CDNs -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .font-display {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      background: #475569;
+    }
+    /* Print Styles for Certificate */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #print-certificate, #print-certificate * {
+        visibility: visible;
+      }
+      #print-certificate {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 40px;
+        border: 10px double #4a5568 !important;
+        background-color: white !important;
+        color: black !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 transition-colors duration-200">
+  <div id="root"></div>
+
+  <!-- Main React Babel Script -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useMemo } = React;
+
+    // --- ICON HELPER COMPONENT ---
+    const Icon = ({ name, className = "w-5 h-5", ...props }) => {
+      const [rendered, setRendered] = useState(false);
+      const spanRef = useRef(null);
+
+      useEffect(() => {
+        if (window.lucide && window.lucide.icons) {
+          // Normalize names from PascalCase to camelCase or kebab-case
+          const camel = name.charAt(0).toLowerCase() + name.slice(1);
+          const iconObj = window.lucide.icons[camel] || window.lucide.icons[name];
+          if (iconObj && spanRef.current) {
+            spanRef.current.innerHTML = iconObj.toSvg({ 
+              class: className,
+              'stroke-width': props.strokeWidth || 2
+            });
+          }
+        }
+      }, [name, className, window.lucide]);
+
+      return <span ref={spanRef} className="inline-flex items-center justify-center shrink-0" />;
+    };
+
+    // --- DATASETS (COMPACT STRUCTURE) ---
+    const THEMES = [
+      {
+        id: 'theme-1',
+        number: 1,
+        title: 'Das Sociedades Recoletoras às Primeiras Civilizações',
+        shortTitle: 'Recolectores a Civilizações',
+        color: 'from-amber-500 to-orange-700',
+        textColor: 'text-amber-600',
+        bgColor: 'bg-amber-100',
+        accentColor: 'amber',
+        iconName: 'flame',
+        subsections: [
+          {
+            id: 'theme-1-sub-1',
+            title: 'Das sociedades recoletoras às primeiras sociedades produtoras',
+            content: `O **Paleolítico** (idade da pedra lascada) foi marcado pelo **nomadismo** e por uma **economia recoletora**, onde as comunidades humanas sobreviviam da caça, pesca e recolha de frutos silvestres.
+\n\nDurante este período, o domínio do **fogo** foi uma das maiores conquistas da humanidade, permitindo aquecer as cavidades, afugentar predadores, cozinhar alimentos e fortalecer os laços sociais. A **arte rupestre** (gravuras e pinturas nas rochas e grutas, como em Foz Côa ou Altamira) demonstra o pensamento simbólico e religioso das comunidades recoletoras, muitas vezes ligada a rituais de caça e fertilidade.
+\n\nCom a revolução do **Neolítico** (idade da pedra polida), há cerca de 10 000 anos, ocorre a transição para uma **economia produtora** baseada na **agricultura** e na **domesticidade e criação de animais** (pastorícia). Isto permitiu a **sedentarização** dos seres humanos, que passaram a viver em aldeamentos permanentes e a criar novas técnicas como a olaria, a tecelagem e a metalurgia.
+\n\nSurgem também os monumentos **megalíticos** (grandes construções de pedra como menires, dólmenes e cromeleques), que revelam o culto dos mortos e a adoração de forças da natureza.`,
+            keyConcepts: ['Paleolítico', 'Neolítico', 'Nomadismo', 'Sedentarização', 'Arte Rupestre', 'Megalitismo', 'Recoleção']
+          },
+          {
+            id: 'theme-1-sub-2',
+            title: 'Contributos das primeiras civilizações do Oriente antigo',
+            content: `As primeiras grandes civilizações urbanas surgiram nas margens de grandes rios - as chamadas **Civilizações dos Grandes Rios** (ou Crescente Fértil):
+\n* **Egito** (junto ao Rio Nilo)
+\n* **Mesopotâmia** (junto aos Rios Tigre e Eufrates)
+\n* **Índia** (junto ao Rio Indo)
+\n* **China** (junto ao Rio Amarelo)
+\n\nA fertilidade dos solos irrigados permitiu um enorme desenvolvimento agrícola, gerando excedentes que sustentaram o crescimento das cidades e a especialização do trabalho. Para gerir estas sociedades complexas, surgiu a necessidade de registo, o que levou à invenção da **escrita** (hieroglífica no Egito, cuneiforme na Mesopotâmia).
+\n\nEstas sociedades eram fortemente **estratificadas** e hierarquizadas. No topo estavam os soberanos divinizados (Faraós no Egito, Reis-Sacerdotes na Mesopotâmia), seguidos por sacerdotes, escribas e militares, e na base encontravam-se camponeses, artesãos e escravos. A **religião** era **politeísta** (adoração de vários deuses) e desempenhava um papel central na organização política.`,
+            keyConcepts: ['Crescente Fértil', 'Rio Nilo', 'Hieróglifos', 'Cuneiforme', 'Sociedade Estratificada', 'Politeísmo']
+          }
+        ],
+        flashcards: [
+          { id: 'fc-1-1', term: 'Nomadismo', definition: 'Modo de vida das populações que não têm habitação fixa, deslocando-se constantemente para procurar alimentos.', context: 'Paleolítico' },
+          { id: 'fc-1-2', term: 'Sedentarização', definition: 'Fixação permanente de uma comunidade num determinado território, facilitada no Neolítico pela agricultura.', context: 'Neolítico' },
+          { id: 'fc-1-3', term: 'Megalitismo', definition: 'Construção de monumentos com grandes blocos de pedra, como dólmenes, menires e cromeleques.', context: 'Neolítico' },
+          { id: 'fc-1-4', term: 'Politeísmo', definition: 'Crença ou adoração em múltiplos deuses ou divindades, característica das primeiras grandes civilizações.', context: 'Religião' }
+        ],
+        quiz: [
+          {
+            id: 'q-1-1',
+            question: 'Qual das seguintes opções caracteriza o modo de vida do Paleolítico?',
+            options: ['Sedentarização e agricultura ativa.', 'Nomadismo e economia baseada na recoleção.', 'Uso generalizado de escrita cuneiforme.', 'Desenvolvimento de cidades junto ao Nilo.'],
+            correctIndex: 1,
+            explanation: 'No Paleolítico, o ser humano era recoletor e nómada, dependente da deslocação dos recursos naturais e de animais selvagens para subsistir.'
+          },
+          {
+            id: 'q-1-2',
+            question: 'O que motivou a sedentarização humana no Neolítico?',
+            options: ['O aparecimento da arte rupestre nas cavernas.', 'A descoberta do fogo que manteve as pessoas nas grutas.', 'A invenção da escrita hieroglífica pelos escribas.', 'A descoberta da agricultura e a domesticação de animais.'],
+            correctIndex: 3,
+            explanation: 'Com a agricultura e a pastorícia (economia produtora), as comunidades depararam-se com a necessidade de vigiar as plantações e os rebanhos, fixando-se no mesmo sítio.'
+          }
+        ],
+        reflection: [
+          { id: 'ref-1-1', question: "Como teria mudado a tua vida diária se fosses um jovem a viver na transição do Paleolítico para o Neolítico? Que novas competências terias de aprender?", tip: "Pensa nos afazeres diários: antes tinhas de caçar e recolher; agora tens de semear cereais e cuidar do gado." }
+        ]
+      },
+      {
+        id: 'theme-2',
+        number: 2,
+        title: 'A Herança do Mediterrâneo Antigo',
+        shortTitle: 'Mediterrâneo Antigo',
+        color: 'from-blue-600 to-indigo-800',
+        textColor: 'text-indigo-600',
+        bgColor: 'bg-indigo-100',
+        accentColor: 'indigo',
+        iconName: 'compass',
+        subsections: [
+          {
+            id: 'theme-2-sub-1',
+            title: 'Os Gregos no século V a.C. - O modelo ateniense',
+            content: `No século V a.C., **Atenas** destacou-se no mundo grego pela criação de uma forma pioneira de governo: a **democracia** (governo do povo). Mas atenção, no modelo da democracia ateniense a **cidadania** era muito restrita!
+\n\nApenas eram considerados **cidadãos** os homens livres, maiores de idade, com serviço militar cumprido, filhos de pai e mãe atenienses. Estavam totalmente excluídos os metecos (estrangeiros), as mulheres e os escravos (que constituíam a vasta maioria da população).
+\n\nOs cidadãos participavam diretamente na aprovação de leis, declarações de guerra e julgamentos através da assembleia popular reunida na **Eclésia**. Os gregos deixaram-nos uma herança cultural imensa. Destacam-se as **Artes Clássicas** (focadas na harmonia, simetria e proporção inspiradas no corpo humano, visíveis em templos como o Partenon), o teatro (comédia e tragédia), os Jogos Olímpicos, e a **Filosofia** com grandes mestres como Sócrates, Platão e Aristóteles, que procuravam explicar o mundo através da razão.`,
+            keyConcepts: ['Democracia Direta', 'Cidadania Restrita', 'Partenon', 'Eclésia', 'Filosofia', 'Jogos Olímpicos']
+          },
+          {
+            id: 'theme-2-sub-2',
+            title: 'O Mundo Romano no apogeu do Império',
+            content: `Nos primeiros séculos d.C., Roma tornou-se o centro de um dos mais vastos impérios da História, que dominava todas as margens do mar Mediterrâneo (a que os romanos chamavam carinhosamente *Mare Nostrum*).
+\n\nO sucesso do **Império Romano** assentou numa forte eficácia **administrativa**, num exército profissionalizado e disciplinado, e numa próspera **economia** urbana, mercantil e monetária, que unia as províncias por uma fantástica rede de estradas e portos fluviais/marítimos.
+\n\nA expansão romana promoveu a **romanização**: a assimilação dos hábitos, da língua (o latim), do urbanismo, das divindades e das leis romanas pelas populações conquistadas. Os romanos destacaram-se pelo **urbanismo** monumental estruturando as cidades com fóruns, aquedutos, termas públicas, anfiteatros e arcos do triunfo. Através do **Direito Romano**, codificaram leis que ainda hoje servem de base para os sistemas jurídicos ocidentais modernos.`,
+            keyConcepts: ['Mare Nostrum', 'Romanização', 'Direito Romano', 'Estradas Romanas', 'Urbanismo', 'Império Romano']
+          },
+          {
+            id: 'theme-2-sub-3',
+            title: 'Origem e difusão do Cristianismo',
+            content: `Na **Palestina Romana**, província situada no Médio Oriente sob domínio de Roma, nasceu Jesus de Nazaré, cujos ensinamentos deram origem ao **Cristianismo**.
+\n\nDiferente do culto imperial e do politeísmo romano, o Cristianismo é uma religião **monoteísta** (um único Deus) baseada no amor ao próximo, na igualdade espiritual de todos os seres humanos perante Deus, na fraternidade e na esperança de salvação e vida eterna. Os seus textos sagrados dividem-se em **Antigo Testamento** e **Novo Testamento**.
+\n\nEsta crença expandiu-se rapidamente pelo Império, impulsionada pelas estradas e comércio romanos e pela pregação dos apóstolos (como S. Paulo). Nos primeiros séculos, os cristãos sofreram terríveis perseguições porque o seu monoteísmo proibia-os de celebrar o culto divino devido ao Imperador romano.
+\n\nMas no século IV d.C., o panorama muda:
+\n* Em **313 d.C.**, o Imperador Constantino concede liberdade de culto aos cristãos através do **Édito de Milão**.
+\n* Em **380 d.C.**, o Imperador Teodósio proclama o Cristianismo como a **religião oficial e exclusiva do Império Romano** através do Édito de Tessalónica.`,
+            keyConcepts: ['Monoteísmo', 'Palestina', 'Édito de Milão', 'Jesus de Nazaré', 'Novo Testamento']
+          }
+        ],
+        flashcards: [
+          { id: 'fc-2-1', term: 'Cidadão Ateniense', definition: 'Homem livre, filho de pai e mãe atenienses, maior de 18 anos, que prestou o serviço militar e tem direito a participar no governo da Cidade-Estado.', context: 'Grécia Antiga' },
+          { id: 'fc-2-2', term: 'Romanização', definition: 'Processo de integração e adoção da cultura, língua latim, religião, leis e estilo de vida romano pelas populações das províncias conquistadas.', context: 'Império Romano' },
+          { id: 'fc-2-3', term: 'Monoteísmo', definition: 'Doutrina religiosa que crê e defende a existência de um único Deus supremo (ex: Judaísmo, Cristianismo e Islamismo).', context: 'Religião' }
+        ],
+        quiz: [
+          {
+            id: 'q-2-1',
+            question: 'Quem estava excluído dos direitos políticos na democracia da Atenas no Século V a.C.?',
+            options: ['Apenas os escravos.', 'As mulheres, os metecos (estrangeiros) e os escravos.', 'Todos os homens nascidos fora da Grécia continental.', 'Somente os filósofos gregos.'],
+            correctIndex: 1,
+            explanation: 'A democracia ateniense era direta mas altamente restrita. Mulheres, metecos e escravos não eram considerados cidadãos e não podiam votar ou participar das decisões.'
+          },
+          {
+            id: 'q-2-2',
+            question: 'O Édito de Milão promulgado em 313 d.C. por Constantino foi decisivo para o Cristianismo porque:',
+            options: ['Decretou a crucificação de todos os pecadores.', 'Concedeu a liberdade religiosa e o fim das perseguições aos cristãos no Império Romano.', 'Dividiu o Império Romano do Ocidente em três novos reinos.', 'Proibiu expressamente as doutrinas politeístas no senado de Roma.'],
+            correctIndex: 1,
+            explanation: 'O Édito de Milão terminou com séculos de terríveis perseguições, garantindo liberdade total de consciência e culto a todas as religiões, incluindo o Cristianismo.'
+          }
+        ],
+        reflection: [
+          { id: 'ref-2-1', question: "Dada a grande exclusão de mulheres, estrangeiros e escravos na Atenas Antiga, em que medida a democracia moderna que desfrutamos hoje é diferente e melhor?", tip: "Pensa no sufrágio universal de voto: hoje, todos os cidadãos maiores de idade têm direito a voto." }
+        ]
+      },
+      {
+        id: 'theme-3',
+        number: 3,
+        title: 'A Formação da Cristandade Ocidental e a Expansão Islâmica',
+        shortTitle: 'Cristandade e Islão',
+        color: 'from-emerald-600 to-teal-850',
+        textColor: 'text-emerald-600',
+        bgColor: 'bg-emerald-100',
+        accentColor: 'emerald',
+        iconName: 'shield',
+        subsections: [
+          {
+            id: 'theme-3-sub-1',
+            title: 'A Europa dos séculos VI a IX - Fragmentação e subsistência',
+            content: `No século V d.C. (mais precisamente em **476 d.C.**), o Império Romano do Ocidente desmorona-se sob o peso de crises internas e das sucessivas **invasões bárbaras** (povos germânicos como os Visigodos, Suevos, Francos, etc.). Este marco inicia a chamada **Idade Média**.
+\n\nO vasto império fragmentou-se em vários reinos germânicos. Assistiu-se a um declínio da vida nas cidades, um retrocesso comercial e uma fuga da população para as áreas rurais (ruralização).
+\n\nA nível social e cultural, a **Igreja Católica** permaneceu como a única força com autoridade organizada do continente. Serviu de elemento unificador dos bárbaros e preservou a cultura latina medieval escrita e artística através dos monges copistas nos mosteiros.
+\n\nInstalou-se uma **economia de subsistência** baseada na agricultura de sobrevivência, quase sem moeda circulante, onde quase toda a produção destinava-se unicamente ao autoconsumo local dentro dos latifúndios.`,
+            keyConcepts: ['Queda de Roma', 'Idade Média', 'Invasões Bárbaras', 'Igreja Católica', 'Economia de Subsistência']
+          },
+          {
+            id: 'theme-3-sub-2',
+            title: 'O Mundo Muçulmano em expansão',
+            content: `No século VII (ano 622 d.C. - a Hégira), na Península Arábica, o profeta **Maomé** funda o **Islamismo**, uma nova e poderosa religião monoteísta baseada na submissão a Alá (Deus), cujo livro sagrado é o **Corão** (ou Alcorão).
+\n\nApós a morte de Maomé, verificou-se uma fulgurante **Expansão Islâmica** militar e comercial, que em escassas décadas conquistou todo o Médio Oriente, o Norte de África até chegar à Península Ibérica no ano **711 d.C.**.
+\n\nO império árabe uniu vastíssimos territórios e estabeleceu uma rica **cultura islâmica**, caracterizada pelo desenvolvimento extraordinário das ciências (álgebra, astronomia, medicina), novas técnicas agrícolas de regadio (introdução de nora, canais e novos cultivos como citrinos e arroz), e uma arquitetura caracterizada pelo arco de ferradura e intrincados mosaicos geométricos (arabescos).`,
+            keyConcepts: ['Maomé', 'Islamismo', 'Corão', 'Hégira', 'Regadio', 'Cultura Islâmica']
+          },
+          {
+            id: 'theme-3-sub-3',
+            title: 'A Península Ibérica nos séculos IX a XII - Do Condado à Fundação de Portugal',
+            content: `Na Península Ibérica, as forças cristãs recuadas no norte montanhoso organizaram a resistência física nas Astúrias, dando início ao longo combate militar da **Reconquista Cristã** para recuperar os territórios aos mouros muçulmanos.
+\n\nPara auxiliar na guerra santa, no século XI chegaram cruzados europeus à Ibéria. Entre eles estava o nobre francês **D. Henrique de Borgonha**, que pelos seus excelentes serviços recebeu o título de Conde do **Condado Portucalense** sob o suseranato de Leão e Castela.
+\n\nCom a morte do Conde D. Henrique, o seu jovem e ambicioso filho **D. Afonso Henriques** revolta-se contra o jugo de Castela e a política de sua mãe. Vence-a na célebre **Batalha de S. Mamede (1128)**, assumindo o governo do condado.
+\n\nComeça o processo de afirmação histórica de Portugal:
+\n* **1139 (Batalha de Ourique)**: D. Afonso Henriques é aclamado Rei pelos soldados.
+\n* **1143 (Tratado de Zamora)**: Reconhecimento da independência do Reino de Portugal por Castela.
+\n* **1179 (Bula Manifestis Probatum)**: O Papa Alexandre III reconhece oficialmente perante a Igreja de Roma a independência e realeza de de Portugal.`,
+            keyConcepts: ['Reconquista Cristã', 'Condado Portucalense', 'D. Afonso Henriques', 'Batalha de S. Mamede', 'Tratado de Zamora', 'Manifestis Probatum']
+          }
+        ],
+        flashcards: [
+          { id: 'fc-3-1', term: 'Feudalismo', definition: 'Estrutura social, económica e política da sociedade medieval baseada nas relações de dependência pessoal (vassalagem) e na posse da terra (feudo).', context: 'Europa Medieval' },
+          { id: 'fc-3-2', term: 'Vassalagem', definition: 'Relação de dependência recíproca entre duas pessoas livres da nobreza (vassalo e suserano), selada pelo juramento de fidelidade em troca de terras.', context: 'Feudalismo' },
+          { id: 'fc-3-3', term: 'Reconquista Cristã', definition: 'Processo de luta militar no qual os reinos cristãos do norte da Península Ibérica recuperaram gradualmente os territórios sob domínio muçulmano.', context: 'História de Portugal' }
+        ],
+        quiz: [
+          {
+            id: 'q-3-1',
+            question: 'Como se chama o importante acordo militar e social selado por fidelidade mútua entre suserano e vassalo no feudalismo medieval?',
+            options: ['Ostracismo democrático', 'Contrato de Vassalagem', 'Foral Concelhio', 'Édito Religioso'],
+            correctIndex: 1,
+            explanation: 'O contrato de vassalagem consagrava a união política, tributária e militar entre suseranos e vassalos da aristocracia feudal.'
+          },
+          {
+            id: 'q-3-2',
+            question: 'Qual a batalha em 1128 em que D. Afonso Henriques assume as rédeas de governo do Condado Portucalense lutando contra os apoiantes da sua mãe D. Teresa?',
+            options: ['Batalha de Ourique.', 'Batalha de Aljubarrota.', 'Batalha de São Mamede.', 'Batalha de Toro.'],
+            correctIndex: 2,
+            explanation: 'A Batalha de São Mamede em Guimarães pôs em confronto D. Afonso Henriques e os partidários de sua mãe, D. Teresa. Foi o início real da autonomia governativa de Portugal.'
+          }
+        ],
+        reflection: [
+          { id: 'ref-3-1', question: "D. Afonso Henriques liderou com determinação e carisma a conquista e unificação de um novo reino. Que qualidades achas necessárias para liderar pessoas?", tip: "Pensa no diplomata e militar: D. Afonso Henriques não foi apenas guerreiro; também soube assinar o Tratado de Zamora com Castela." }
+        ]
+      },
+      {
+        id: 'theme-4',
+        number: 4,
+        title: 'Portugal no Contexto Europeu dos Séculos XII a XIV',
+        shortTitle: 'Portugal nos Sécs. XII-XIV',
+        color: 'from-rose-600 to-red-800',
+        textColor: 'text-rose-600',
+        bgColor: 'bg-rose-100',
+        accentColor: 'rose',
+        iconName: 'crown',
+        subsections: [
+          {
+            id: 'theme-4-sub-1',
+            title: 'Desenvolvimento económico, relações sociais e poder político',
+            content: `Nos séculos XII a XIV, Portugal consolida o seu espaço físico após esticar a fronteira meridional até ao Algarve com o rei D. Afonso III. Com a estabilização militar da Reconquista nacional, verifica-se uma era de expansão económica e de afirmação parlamentar.
+\n\nSurge uma nova classe social ligada ao comércio e aos negócios urbanos: a **burguesia**. Para dinamizar a economia, os monarcas incentivam a realização de **mercados** e feiras periódicas, isentando os feirantes de tributos (as chamadas Feiras Francas).
+\n\nO rei emite **Forais** criando os **Concelhos** (comuna medieval governada por "homens-bons" locais), dividindo as decisões locais administrativamente com o povo organizado.
+\n\nPara refrear o enorme poder das ordens feudais privilegiadas (clero e nobreza), os reis portugueses iniciam a centralização política. Em **1254 (nas Cortes de Leiria)** convocadas por D. Afonso III, regista-se um imenso marco histórico: pela primeira vez na Europa, representantes do povo comum (o braço dos procuradores dos concelhos) participam ao lado do Clero e da Nobreza nas **Cortes** gerais para votar dotações reais.`,
+            keyConcepts: ['Burguesia', 'Cortes de Leiria', 'Foral', 'Concelhos', 'Feiras Francas', 'Lisboa Medieval']
+          },
+          {
+            id: 'theme-4-sub-2',
+            title: 'As crises e revolução do século XIV (1383-1385)',
+            content: `O século XIV na Europa e em Portugal foi uma época dramática, marcada por fomes e assolada pela terrível epidemia da **Peste Negra (1348)**, que dizimou um terço da população europeia.
+\n\nEsta devastação biológica gerou **crises económicas** e sociais profundas, com desorganização agrícola por falta de braços produtores, inflação, quebras de rendimento e violentas revoltas populares por melhores salários civis nos campos de trabalho.
+\n\nA este caos acrescentou-se a grande crise política de **1383-1385** em Portugal: com a morte de D. Fernando sem deixar herdeiros varões diretos de coroa, a herdeira Dona Beatriz casara-se com o rei D. João I de Castela, colocando em iminente perigo a própria independência nacional de anexação territorial.
+\n\nA nação cindiu-se em duas fações:
+\n* Nobreza tradicional que apoiava Castela.
+\n* Burguesia urbana e povo comum que apoiavam a independência e o carismático **D. João, Mestre de Avis**.
+\n\nEis o desenrolar revolucionário:
+\n1. **As Cortes de Coimbra (1385)**: D. João Mestre de Avis é eleito democraticamente Rei de Portugal pelos legistas nacionais.
+\n2. **A Batalha de Aljubarrota (1385)**: As forças portuguesas, lideradas pelo génio militar do Condestável **D. Nuno Álvares Pereira**, e recorrendo à fantástica tática do quadrado militar defensivo, desbaratam o vasto exército de Castela, garantindo a sobrevivência e autonomia de Portugal.`,
+            keyConcepts: ['Peste Negra', 'Crise de 1383-1385', 'Mestre de Avis', 'Nuno Álvares Pereira', 'Batalha de Aljubarrota', 'Cortes de Coimbra']
+          }
+        ],
+        flashcards: [
+          { id: 'fc-4-1', term: 'Burguesia', definition: 'Grupo social urbano que surgiu na Baixa Idade Média, composto por mercadores, artesãos, banqueiros e lojistas.', context: 'Desenvolvimento Social' },
+          { id: 'fc-4-2', term: 'Cortes', definition: 'Assembleia consultiva convocada pelo rei onde se reuniam as três ordens sociais: Clero, Nobreza e, a partir de 1254, o Povo.', context: 'Poder Político' },
+          { id: 'fc-4-3', term: 'Peste Negra', definition: 'Grave pandemia de peste bubónica devastadora que assolou a Europa a partir de 1348, eliminando cerca de 30% a 50% da população.', context: 'Crise do Século XIV' }
+        ],
+        quiz: [
+          {
+            id: 'q-4-1',
+            question: 'O ano de 1254 marcou a convocação das célebres Cortes de Leiria pelo rei D. Afonso III. Por que foram revolucionárias na Europa?',
+            options: ['Pela primeira vez, os representantes do povo comum (concelhos) foram convocados ao lado de Clero e Nobreza.', 'Pois nelas se declarou o fim da dinastia de Avis.', 'Decretaram a isenção de impostos das ordens mais desfavorecidas.', 'Ali se assinou o Tratado de Zamora que fundou o Condado.'],
+            correctIndex: 0,
+            explanation: 'Nas Cortes de Leiria de 1254, registou-se a introdução pioneira do Terceiro Estado (Povo) na assembleia de coroa, quebrando o monopólio das ordens privilegiadas.'
+          },
+          {
+            id: 'q-4-2',
+            question: 'Quem liderou as forças portuguesas na decisiva vitória da Batalha de Aljubarrota em 1385 impedindo a união nacional forçada com Castela?',
+            options: ['O Conde D. Henrique de Borgonha.', 'D. João I Mestre de Avis e o Condestável D. Nuno Álvares Pereira.', 'A professora Carla Oliveira.', 'Sócrates e os seus soldados gregos.'],
+            correctIndex: 1,
+            explanation: 'D. João I e o seu comandante militar D. Nuno Álvares Pereira arquitetaram a vitória em Aljubarrota contra as forças de Castela, resguardando a independência.'
+          }
+        ],
+        reflection: [
+          { id: 'ref-4-1', question: "Como é que a tática do quadrado usada em Aljubarrota, com muito menos soldados luso, espelha a ideia de que a inteligência vence as forças físicas?", tip: "Com a astúcia táctica de cavar trincheiras estreitas, os portugueses venceram um exército castelhano muito maior." }
+        ]
+      }
+    ];
+
+    const TIMELINE_EVENTS = [
+      { id: 'tl-1', themeId: 'theme-1', year: 'c. 10 000 a.C.', title: 'Revolução Agrícola do Neolítico', description: 'Transição das sociedades recolectoras à agricultura e fixação no território em habitações.', extendedExplanation: 'Na região do Crescente Fértil, as comunidades descobrem a semente do trigo e cevada e domesticam ovelhas e cabras. Isto estimula a sedentarização e novos ofícios como a olaria e a tecelagem.', curiosity: 'O mamute lanudo acabou por desaparecer nesta transição devido à melhoria térmica do clima.' },
+      { id: 'tl-2', themeId: 'theme-1', year: 'c. 3300 a.C.', title: 'Invenção da Escrita na Mesopotâmia', description: 'Desenho de caracteres cuneiformes em tabuinhas de argila na Suméria.', extendedExplanation: 'Necessidades de registo de grãos estatais, gado e contabilidade impulsionaram a invenção da escrita cuneiforme na Mesopotâmia, abrindo o período oficial da História.', curiosity: 'Os hieróglifos egípcios eram considerados "palavras sagradas dos deuses".' },
+      { id: 'tl-3', themeId: 'theme-2', year: 'Século V a.C.', title: 'Apogeu da Democracia Ateniense', description: 'Florescimento da pólis clássica na assembleia popular da Eclésia.', extendedExplanation: 'Debate de cidadãos livres na Eclésia de Atenas para governar o território comum de forma direta. Constroem-se templos como o Partenon de simetria impecável.', curiosity: 'O termo "Ostracismo" vinha do pedaço de prato partido (ostrako) no qual escreviam o nome do exilado.' },
+      { id: 'tl-4', themeId: 'theme-2', year: 'Século II d.C.', title: 'A Pax Romana e Romanização', description: 'Fronteiras consolidadas ao redor de todo o Mediterrâneo e expansão do latim.', extendedExplanation: 'Roma unifica as províncias por uma rede monumental de estradas, termas, fóruns e leis comuns sob um corpo coeso de administração imperial.', curiosity: 'A herança das estradas romanas definiu os eixos de circulação terrestres em Portugal.' },
+      { id: 'tl-5', themeId: 'theme-3', year: '1143 d.C.', title: 'Tratado de Zamora: Reino de Portugal', description: 'D. Afonso Henriques e o rei de Leão e Castela reconhecem a independência mútua.', extendedExplanation: 'Portugal nasce formalmente perante os vizinhos ibéricos. Pouco depois, em 1179, a Bula Manifestis Probatum do Papa consagra a soberania diplomática lusa para todo o sempre.', curiosity: 'D. Afonso Henriques tinha cerca de 1,90m de altura, um gigante de ferro para o seu tempo histórico!' },
+      { id: 'tl-6', themeId: 'theme-4', year: '1385 d.C.', title: 'Vitória de Aljubarrota', description: 'A tática do quadrado de Nuno Álvares Pereira destrói a cavalaria castelhana.', extendedExplanation: 'Consagração militar de Portugal na crise dinástica de 1383-1385. O Mestre de Avis (D. João I) derrota as tropas de Castela e inicia a dinastia Avis.', curiosity: 'A tática do quadrado medieval foi inspirada em batalhas inglesas que Nuno leu em crónicas antigas.' }
+    ];
+
+    const HISTORICAL_SOURCES = [
+      {
+        id: 'src-1',
+        themeId: 'theme-1',
+        title: 'Arte Rupestre de Foz Côa',
+        type: 'image',
+        reference: 'Vale do Côa, Portugal - c. 22 000 a.C. (Paleolítico)',
+        visualAsset: 'Gravura ao ar livre de auroques e cavalos selvagens em xisto.',
+        description: 'Gravuras paleolíticas executadas ao ar livre detetadas nos anos 90 nas margens do rio Côa. Estes vestígios demonstram o bando de caçadores-recoletores sem habitação fixa que habitava o continente português.',
+        questions: ['Que animais estão representados na gravura do Paleolítico?', 'Porque é que as gravuras são fontes importantes mesmo sem escrita?'],
+        suggestedAnswers: [
+          'Representam principalmente cavalos, cabras e auroques (touros selvagens) desenhados com quartzito duro.',
+          'São fontes iconográficas materiais valiosas que revelam rituais de caça, práticas simbólicas e o ambiente do ser humano paleolítico.'
+        ]
+      },
+      {
+        id: 'src-2',
+        themeId: 'theme-1',
+        title: 'Fragmento do Código de Hamurábi',
+        type: 'text',
+        reference: 'Mesopotâmia (Babilónia) - Séc. XVIII a.C. (Cuneiforme)',
+        visualAsset: 'Estela cilíndrica de diorito preto com caracteres cuneiformes.',
+        contentHtml: '«Se um homem de plenos direitos partir o dente de outro homem da mesma classe, ser-lhe-á dente por dente quebrado... Se quebrar o osso de um camponês livre, pagará uma mina de prata... Se quebrar o osso de um escravo, pagará metade do valor de mercado ao seu dono...»',
+        description: 'Um dos blocos monumentais de leis reguladoras das classes sociais na Babilónia antiga, conhecido popularmente pela frase de Talião "olho por olho, dente por dente".',
+        questions: ['A punição era igual para todas as classes sociais?', 'Como é que este fragmento comprova a estratificação social?'],
+        suggestedAnswers: [
+          'Não, as punições eram duríssimas contra agressores da mesma classe (Talião literal), mas convertiam-se em simples compensações financeiras contra camponeses ou escravos.',
+          'Comprova porque divide as pessoas expressamente diante do tribunal em três níveis independentes: Homens Livres de topo, Camponeses ordinários e Escravos sem direitos civis.'
+        ]
+      }
+    ];
+
+    const CURIOSITIES = [
+      { id: 'c-1', title: 'O Fogo Salvador', fact: 'O domínio do fogo mudou a face da biologia humana.', didYouKnow: 'Cozinhar os alimentos no Paleolítico tornou os dentes e mandíbulas menores e as calorias do cérebro maiores, favorecendo a evolução intelectual acelerada!' },
+      { id: 'c-2', title: 'Cimento Secreto de Roma', fact: 'Os edifícios romanos duravam milénios devido a cinzas vulcânicas.', didYouKnow: 'O betão romano continha cinzas vulcânicas (pozzolana) que se tornavam ainda mais duras e impenetráveis em contacto com a água do mar. Por isso os aquedutos romanos ainda estão em pé!' },
+      { id: 'c-3', title: 'A Peste e a Higiene', fact: 'Na Peste Negra culpava-se os gatos livres pela catástrofe.', didYouKnow: 'Eliminar os gatos medievais por superstições feudais acabou por favorecer a explosão das ratazanas portadoras de pulgas infetadas, piorando a propagação desenfreada!' }
+    ];
+
+    const BADGES = [
+      { id: 'badge-1', title: 'Calouro de Clio', description: 'Introduziu o seu nome na caderneta de História do 7.º ano.', icon: '🎓', unlockedAtPoints: 0, className: 'bg-blue-100 dark:bg-blue-900 border-blue-200' },
+      { id: 'badge-2', term: 'Recoletor Curioso', description: 'Excedeu os 500 XP lendo crónicas, lições e biografias.', icon: '🔥', unlockedAtPoints: 500, className: 'bg-amber-100 dark:bg-amber-900 border-amber-200' },
+      { id: 'badge-3', title: 'Centurião Romano', description: 'Acumulou 1000 XP descobrindo aquedutos civis e leis de Roma.', icon: '🏛️', unlockedAtPoints: 1000, className: 'bg-indigo-100 dark:bg-indigo-900 border-indigo-200' },
+      { id: 'badge-4', title: 'Cavaleiro Luso', description: 'Chegou aos 1800 XP dominando alianças dinásticas e a Reconquista.', icon: '⚔️', unlockedAtPoints: 1800, className: 'bg-emerald-100 dark:bg-emerald-900 border-emerald-200' },
+      { id: 'badge-5', title: 'Grão-Mestre de Avis', description: 'Conquistou glória máxima superior a 2500 XP de erudição.', icon: '👑', unlockedAtPoints: 2500, className: 'bg-rose-100 dark:bg-rose-900 border-rose-200' }
+    ];
+
+    // --- ACCESSIBILITY HELPER ---
+    const SPEECH = {
+      speak: (text) => {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = 'pt-PT';
+          window.speechSynthesis.speak(utterance);
+        }
+      },
+      stop: () => {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+      }
+    };
+
+    // -------------------------------------------------------------
+    // --- MAIN APP REVOLUTION ---
+    // -------------------------------------------------------------
+    function App() {
+      const [progress, setProgress] = useState(() => {
+        const saved = localStorage.getItem('historia-7-progress');
+        if (saved) {
+          try { return JSON.parse(saved); } catch (e) { }
+        }
+        return {
+          name: '',
+          points: 0,
+          completedThemes: [],
+          completedQuizzes: [],
+          completedFinalQuiz: false,
+          finalQuizScore: 0,
+          answeredReflectionAnswers: {},
+          analyzedSourcesNotes: {},
+          gameScores: {}
+        };
+      });
+
+      const [activeTab, setActiveTab] = useState('inicio');
+      const [fontSize, setFontSize] = useState('normal'); // 'normal' | 'large' | 'extra'
+      const [darkMode, setDarkMode] = useState(() => {
+        return localStorage.getItem('historia-7-dark') === 'true';
+      });
+      const [activeThemeId, setActiveThemeId] = useState(THEMES[0].id);
+
+      useEffect(() => {
+        localStorage.setItem('historia-7-progress', JSON.stringify(progress));
+      }, [progress]);
+
+      useEffect(() => {
+        localStorage.setItem('historia-7-dark', darkMode);
+        const root = document.documentElement;
+        if (darkMode) {
+          root.classList.add('dark');
+          document.body.classList.add('bg-slate-905', 'text-slate-100');
+          document.body.classList.remove('bg-gray-50', 'text-gray-800');
+        } else {
+          root.classList.remove('dark');
+          document.body.classList.add('bg-gray-50', 'text-gray-800');
+          document.body.classList.remove('bg-slate-905', 'text-slate-100');
+        }
+      }, [darkMode]);
+
+      const addPoints = (pts, reason) => {
+        setProgress(prev => {
+          const newPoints = prev.points + pts;
+          return {
+            ...prev,
+            points: newPoints
+          };
+        });
+        // Simple notification toast using custom banner (avoiding window.alert)
+        const toast = document.createElement('div');
+        toast.className = `fixed bottom-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 border ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-200 text-gray-800'} animate-bounce`;
+        toast.innerHTML = `
+          <div class="p-2.5 rounded-xl bg-indigo-600 text-white">✨</div>
+          <div>
+            <p class="font-bold font-display text-sm">+${pts} XP Arrecadado!</p>
+            <p class="text-xs text-gray-400 mt-0.5">${reason}</p>
+          </div>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+      };
+
+      const fontSizeClass = useMemo(() => {
+        if (fontSize === 'large') return 'text-lg';
+        if (fontSize === 'extra') return 'text-xl';
+        return 'text-sm';
+      }, [fontSize]);
+
+      const fontTitleClass = useMemo(() => {
+        if (fontSize === 'large') return 'text-xl font-bold';
+        if (fontSize === 'extra') return 'text-2xl font-black';
+        return 'text-base font-bold';
+      }, [fontSize]);
+
+      const unlockedBadges = useMemo(() => {
+        return BADGES.filter(b => progress.points >= b.unlockedAtPoints);
+      }, [progress.points]);
+
+      return (
+        <div className={`min-h-screen ${darkMode ? 'bg-slate-900 text-white' : 'bg-gray-50 text-gray-800'}`}>
+          
+          {/* Welcome register overlay if name is blank */}
+          {(!progress.name || progress.name.trim() === '') && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-md p-4">
+              <div className={`w-full max-w-md p-8 rounded-3xl shadow-2xl border text-center space-y-6 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
+                <span className="text-5xl animate-bounce inline-block">🎓</span>
+                <div className="space-y-2">
+                  <h1 className="font-display font-black text-2xl tracking-tight text-indigo-600">História do 7.º Ano</h1>
+                  <p className="text-xs text-gray-400">Website Educativo da Professora Carla Oliveira</p>
+                </div>
+                <p className="text-xs text-gray-400">
+                  Inscreve o teu nome completo na caderneta escolar de Clio para guardares conquistas académicas virtuais organizadas e prémios digitais.
+                </p>
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    id="welcome-input-name"
+                    placeholder="Digita aqui o teu nome..."
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && e.target.value.trim() !== '') {
+                        setProgress(prev => ({ ...prev, name: e.target.value.trim() }));
+                        // award points for starting!
+                        addPoints(50, 'Efetuou o registo inaugural de caderneta de história!');
+                      }
+                    }}
+                    className={`w-full p-4 rounded-xl border font-display text-sm outline-none text-center ${darkMode ? 'bg-slate-800 border-slate-700 text-white focus:border-indigo-500' : 'bg-gray-50 border-gray-300 text-gray-800 focus:border-indigo-500'}`}
+                  />
+                  <button
+                    onClick={() => {
+                      const input = document.getElementById('welcome-input-name');
+                      if (input && input.value.trim() !== '') {
+                        setProgress(prev => ({ ...prev, name: input.value.trim() }));
+                        // award points
+                        addPoints(50, 'Efetuou o registo de caderneta!');
+                      }
+                    }}
+                    className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold font-display text-xs tracking-wider transition-colors"
+                  >
+                    Entrar na Aula de História
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TOP ACCESSIBILITY HEADER */}
+          <header className={`border-b ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'} sticky top-0 z-40 shadow-sm px-4 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4`}>
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🏛️</span>
+              <div>
+                <h1 className="font-display font-black text-lg tracking-tight">História 7.º Ano</h1>
+                <p className="text-[10px] text-gray-400 font-mono tracking-wider uppercase">Profª Carla Oliveira</p>
+              </div>
+            </div>
+
+            {/* Accessibility / Controls menu */}
+            <div className="flex items-center gap-3 bg-gray-100 dark:bg-slate-800 p-1.5 rounded-2xl border border-gray-200/40 dark:border-slate-750">
+              <button 
+                onClick={() => setDarkMode(!darkMode)}
+                className={`p-2 rounded-xl transition-all ${darkMode ? 'bg-slate-700 text-yellow-400' : 'bg-white text-gray-600 shadow-sm hover:bg-gray-100'}`}
+                title="Alternar Tema Escuro"
+              >
+                <Icon name={darkMode ? 'sun' : 'moon'} className="w-4 h-4" />
+              </button>
+
+              <div className="flex items-center gap-1 border-l border-gray-300/40 pl-1.5">
+                <button
+                  onClick={() => setFontSize(prev => prev === 'normal' ? 'large' : prev === 'large' ? 'extra' : 'normal')}
+                  className="p-2 rounded-xl bg-white dark:bg-slate-700 text-xs font-bold shadow-sm inline-flex items-center gap-1"
+                  title="Ajustar Tamanho da Fonte"
+                >
+                  <Icon name="type" className="w-3.5 h-3.5" />
+                  <span className="capitalize">{fontSize}</span>
+                </button>
+              </div>
+
+              {/* Stop Audios helper */}
+              <button
+                onClick={() => SPEECH.stop()}
+                className="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/15 text-red-600 dark:text-red-400 text-xs font-bold shadow-sm"
+                title="Parar Leituras de Voz"
+              >
+                Parar Voz
+              </button>
+            </div>
+          </header>
+
+          <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            {/* LEFT NAVIGATION MENU (4 Columns) */}
+            <div className="lg:col-span-3 space-y-4">
+              <div className={`p-5 rounded-3xl border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'} space-y-4 shadow-sm`}>
+                <div className="flex items-center gap-3 pb-3 border-b border-gray-150 dark:border-slate-800">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-display font-black text-lg">
+                    {progress.name ? progress.name.charAt(0).toUpperCase() : 'A'}
+                  </div>
+                  <div>
+                    <h4 className="font-display font-bold text-sm tracking-tight truncate max-w-44">{progress.name || 'Aluno'}</h4>
+                    <span className="text-[10px] font-mono font-bold uppercase py-0.5 px-2 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 rounded">
+                      7.º Ano de Escolaridade
+                    </span>
+                  </div>
+                </div>
+
+                {/* Score panel */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs text-gray-400">
+                    <span>Erudição e Progresso</span>
+                    <strong className="text-indigo-600 dark:text-indigo-400">{progress.points} XP</strong>
+                  </div>
+                  <div className="h-2.5 w-full bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-indigo-600 rounded-full transition-all" style={{ width: `${Math.min(100, (progress.points / 3000) * 100)}%` }} />
+                  </div>
+                  <p className="text-[10px] text-gray-400 text-right">Glória Nível {Math.max(1, Math.floor(progress.points / 600))}</p>
+                </div>
+
+                <nav className="space-y-1.5 pt-3 border-t border-gray-150 dark:border-slate-800">
+                  <button
+                    onClick={() => setActiveTab('inicio')}
+                    className={`w-full p-3 rounded-xl text-left text-xs font-bold flex items-center gap-3 transition-colors ${activeTab === 'inicio' ? 'bg-indigo-600 text-white' : 'text-gray-550 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
+                  >
+                    <Icon name="landmark" className="w-4 h-4" /> Painel de Entrada
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('temas')}
+                    className={`w-full p-3 rounded-xl text-left text-xs font-bold flex items-center gap-3 transition-colors ${activeTab === 'temas' ? 'bg-indigo-600 text-white' : 'text-gray-550 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
+                  >
+                    <Icon name="bookOpen" className="w-4 h-4" /> Temas & Lições
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('cronologia')}
+                    className={`w-full p-3 rounded-xl text-left text-xs font-bold flex items-center gap-3 transition-colors ${activeTab === 'cronologia' ? 'bg-indigo-600 text-white' : 'text-gray-550 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
+                  >
+                    <Icon name="calendar" className="w-4 h-4" /> Linha do Tempo
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('fontes')}
+                    className={`w-full p-3 rounded-xl text-left text-xs font-bold flex items-center gap-3 transition-colors ${activeTab === 'fontes' ? 'bg-indigo-600 text-white' : 'text-gray-550 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
+                  >
+                    <Icon name="fileText" className="w-4 h-4" /> Oficina do Historiador
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('jogos')}
+                    className={`w-full p-3 rounded-xl text-left text-xs font-bold flex items-center gap-3 transition-colors ${activeTab === 'jogos' ? 'bg-indigo-600 text-white' : 'text-gray-550 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
+                  >
+                    <Icon name="trophy" className="w-4 h-4" /> Arena de Jogos
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('final')}
+                    className={`w-full p-3 rounded-xl text-left text-xs font-bold flex items-center gap-3 transition-colors ${activeTab === 'final' ? 'bg-indigo-600 text-white' : 'text-gray-550 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
+                  >
+                    <Icon name="award" className="w-4 h-4" /> Avaliação Final
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('progresso')}
+                    className={`w-full p-3 rounded-xl text-left text-xs font-bold flex items-center gap-3 transition-colors ${activeTab === 'progresso' ? 'bg-indigo-600 text-white' : 'text-gray-550 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
+                  >
+                    <Icon name="star" className="w-4 h-4" /> O Teu Progresso
+                  </button>
+                </nav>
+              </div>
+
+              {/* Decorative Carla Oliveira Teacher message */}
+              <div className={`p-5 rounded-3xl border border-dashed text-xs ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-indigo-50/50 border-indigo-200'} space-y-2.5`}>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">👩‍🏫</span>
+                  <strong className="text-indigo-600 dark:text-indigo-400">Profª Carla Oliveira</strong>
+                </div>
+                <p className="text-gray-500 italic leading-relaxed">
+                  "Estes conteúdos estão alinhados integralmente com as **Aprendizagens Essenciais** do 7.º ano de História. Explora cada secção, participa nos mini-enigmas e boa aula!"
+                </p>
+              </div>
+            </div>
+
+            {/* MAIN CONTENT WORKSPACE PANEL (9 Columns) */}
+            <main className="lg:col-span-9 space-y-6">
+
+              {/* 1. VIEW: INICIO */}
+              {activeTab === 'inicio' && (
+                <div className="space-y-6 animate-fadeIn">
+                  <div className={`p-6 sm:p-8 rounded-3xl border shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'}`}>
+                    <div className="space-y-3 text-center sm:text-left">
+                      <span className="text-[10px] uppercase font-mono font-bold bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 py-1 px-3 rounded-md">
+                        Espaço de Aprendizagem Virtual
+                      </span>
+                      <h2 className="font-display font-black text-xl sm:text-3xl tracking-tight leading-none">
+                        Olá, {progress.name || 'Historiador'}!
+                      </h2>
+                      <p className="text-xs sm:text-sm text-gray-400 leading-relaxed max-w-md">
+                        Dá asas à tua imaginação e estuda grandes momentos, da Pré-História à crise militar e dinástica e sobrevivência de Portugal em 1383-1385.
+                      </p>
+                    </div>
+                    <span className="text-6xl sm:text-7xl">🕰️</span>
+                  </div>
+
+                  {/* Themes index inside Inicio */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {THEMES.map((theme) => (
+                      <div 
+                        key={theme.id}
+                        onClick={() => {
+                          setActiveThemeId(theme.id);
+                          setActiveTab('temas');
+                        }}
+                        className={`p-6 rounded-3xl border cursor-pointer hover:shadow-md transition-all space-y-4 ${darkMode ? 'bg-slate-900 border-slate-800 hover:border-indigo-500' : 'bg-white border-gray-200 hover:border-indigo-300'}`}
+                      >
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] uppercase font-mono tracking-wider text-gray-400">Tema {theme.number}</span>
+                          <span className="text-2xl">📚</span>
+                        </div>
+                        <h3 className="font-display font-bold text-sm sm:text-base leading-snug group-hover:text-indigo-600">{theme.title}</h3>
+                        <p className="text-[11px] text-gray-400 line-clamp-2">Explora as sub-secções, revê conceitos com flashcards dinâmicos e resolve o teste de consolidação.</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 2. VIEW: TEMAS & LIÇÕES */}
+              {activeTab === 'temas' && (
+                <div className="space-y-6">
+                  {/* Tabs selector for theme */}
+                  <div className="flex flex-wrap gap-2">
+                    {THEMES.map((theme) => (
+                      <button
+                        key={theme.id}
+                        onClick={() => setActiveThemeId(theme.id)}
+                        className={`px-4 py-2 text-xs font-bold rounded-xl border transition-all ${theme.id === activeThemeId ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white dark:bg-slate-800 text-gray-500 border-gray-200 dark:border-slate-700 hover:bg-gray-50'}`}
+                      >
+                        Tema {theme.number}
+                      </button>
+                    ))}
+                  </div>
+
+                  {(() => {
+                    const selectedTheme = THEMES.find(t => t.id === activeThemeId) || THEMES[0];
+                    return (
+                      <div className="space-y-6">
+                        {/* Title details */}
+                        <div className={`p-6 rounded-3xl border ${darkMode ? 'bg-slate-905 border-slate-800' : 'bg-white border-gray-200'}`}>
+                          <h3 className="font-display font-black text-lg sm:text-xl text-indigo-600 mb-1">
+                            Tema {selectedTheme.number}: {selectedTheme.title}
+                          </h3>
+                          <p className="text-xs text-gray-400">Lê atentamente a matéria das Aprendizagens Essenciais compilada abaixo.</p>
+                        </div>
+
+                        {/* Read subsections list */}
+                        {selectedTheme.subsections.map((sub, sidx) => (
+                          <div key={sub.id} className={`p-6 rounded-3xl border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'} space-y-4`}>
+                            <h4 className="font-display font-bold text-sm sm:text-base border-b border-gray-100 dark:border-slate-800 pb-2 text-indigo-600">
+                              {sub.title}
+                            </h4>
+                            <div className={`${fontSizeClass} leading-relaxed text-gray-650 dark:text-gray-300 font-normal whitespace-pre-line`}>
+                              {sub.content}
+                            </div>
+                            
+                            {/* Key Concepts Tags */}
+                            <div className="flex flex-wrap gap-1.5 pt-2">
+                              {sub.keyConcepts.map((conc, cidx) => (
+                                <span key={cidx} className="text-[10px] font-mono tracking-wider font-bold py-1 px-2.5 bg-gray-100 dark:bg-slate-800 text-gray-400 rounded-md">
+                                  #{conc}
+                                </span>
+                              ))}
+                            </div>
+
+                            {/* Speech Synthesis Audio Button */}
+                            <button
+                              onClick={() => SPEECH.speak(sub.content.replace(/\*\*/g, ''))}
+                              className="px-4 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/20 hover:bg-indigo-100 text-indigo-650 dark:text-indigo-400 text-xs font-semibold inline-flex items-center gap-1.5 transition-colors"
+                            >
+                              🔊 Ouvir Texto em Voz Alta
+                            </button>
+                          </div>
+                        ))}
+
+                        {/* FLASHCARDS INTERACTION FOR THEME */}
+                        <div className={`p-6 rounded-3xl border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'} space-y-4`}>
+                          <h4 className="font-display font-bold text-xs sm:text-sm uppercase tracking-wider text-gray-400">
+                            🃏 Cartões de Conceito (Revisão Interactiva)
+                          </h4>
+                          <p className="text-xs text-gray-400 mt-1">Clica em qualquer cartão para ver a definição académica correspondente no programa.</p>
+                          
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {selectedTheme.flashcards.map((fc) => (
+                              <div
+                                key={fc.id}
+                                onClick={() => {
+                                  // toggle flashcard flip state locally
+                                  const el = document.getElementById(`flip-${fc.id}`);
+                                  if (el) el.classList.toggle('hidden');
+                                  const el2 = document.getElementById(`normal-${fc.id}`);
+                                  if (el2) el2.classList.toggle('hidden');
+                                  
+                                  // reward points
+                                  const trackingKey = `flashcard-flipped-${fc.id}`;
+                                  if (!progress.gameScores[trackingKey]) {
+                                    addPoints(20, `Revistou conceito: ${fc.term}`);
+                                    progress.gameScores[trackingKey] = 1;
+                                  }
+                                }}
+                                className={`p-5 rounded-2xl border-2 border-dashed cursor-pointer text-center min-h-[110px] flex flex-col justify-center items-center transition-all ${darkMode ? 'bg-slate-850/50 border-slate-700 hover:border-indigo-500' : 'bg-indigo-50/20 border-indigo-150 hover:border-indigo-300'}`}
+                              >
+                                <div id={`normal-${fc.id}`} className="space-y-1">
+                                  <span className="text-[10px] uppercase font-mono tracking-wider font-extrabold text-indigo-650 dark:text-indigo-400">{fc.context}</span>
+                                  <h5 className="font-display font-extrabold text-sm sm:text-base text-gray-800 dark:text-white leading-tight">{fc.term}</h5>
+                                  <span className="text-[10px] text-gray-400 mt-2 block">Clica para ver explicação...</span>
+                                </div>
+                                <div id={`flip-${fc.id}`} className="hidden text-xs text-gray-600 dark:text-gray-300 font-semibold leading-relaxed">
+                                  {fc.definition}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* MINI QUIZ REINFORCEMENT */}
+                        <div className={`p-6 rounded-3xl border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'} space-y-6`}>
+                          <h4 className="font-display font-extrabold text-sm sm:text-base border-b border-gray-150 dark:border-slate-800 pb-2">
+                            📝 Exercício de Treino de Consolidação
+                          </h4>
+
+                          {selectedTheme.quiz.map((q, qidx) => {
+                            const noteKey = `quiz-${q.id}-ans`;
+                            const activeVal = progress.gameScores[noteKey]; // holds selected index
+                            
+                            return (
+                              <div key={q.id} className="space-y-3">
+                                <p className="font-semibold text-xs sm:text-sm text-gray-800 dark:text-white">
+                                  {q.question}
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                  {q.options.map((opt, oidx) => {
+                                    const isChosen = activeVal === oidx;
+                                    const isCorrect = oidx === q.correctIndex;
+                                    let btnStyle = "border-gray-200 dark:border-slate-800 hover:bg-gray-50";
+
+                                    if (activeVal !== undefined) {
+                                      if (isCorrect) {
+                                        btnStyle = "border-green-500 bg-green-500/10 text-green-600";
+                                      } else if (isChosen) {
+                                        btnStyle = "border-red-500 bg-red-500/10 text-red-600";
+                                      } else {
+                                        btnStyle = "opacity-40";
+                                      }
+                                    }
+
+                                    return (
+                                      <button
+                                        key={oidx}
+                                        disabled={activeVal !== undefined}
+                                        onClick={() => {
+                                          setProgress(prev => {
+                                            const updatedScores = { ...prev.gameScores, [noteKey]: oidx };
+                                            return { ...prev, gameScores: updatedScores };
+                                          });
+
+                                          if (oidx === q.correctIndex) {
+                                            addPoints(50, `Acertou na questão rápida de consolidação!`);
+                                          } else {
+                                            addPoints(10, `Participou na questão rápida!`);
+                                          }
+                                        }}
+                                        className={`p-3.5 rounded-xl border text-left text-xs font-semibold transition-all ${btnStyle}`}
+                                      >
+                                        {opt}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+
+                                {activeVal !== undefined && (
+                                  <p className="text-xs text-gray-400 bg-gray-100 dark:bg-slate-800 p-3 rounded-xl italic">
+                                    <strong>Explicação das Aprendizagens Essenciais:</strong> {q.explanation}
+                                  </p>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* 3. VIEW: CRONOLOGIA / LINHA DO TEMPO */}
+              {activeTab === 'cronologia' && (
+                <div className="space-y-6">
+                  <div className={`p-6 rounded-3xl border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'}`}>
+                    <h2 className="font-display font-black text-slate-800 dark:text-slate-100 text-xl tracking-tight">
+                      ⏳ Painel da Linha do Tempo Sincrónica
+                    </h2>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Descobre momentos chave do programa de História do 7.º ano organizados sequencialmente. Clica em qualquer balão temporal para desbloquear histórias detalhadas.
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    {TIMELINE_EVENTS.map((evt) => (
+                      <div 
+                        key={evt.id}
+                        className={`p-5 rounded-2xl border transition-all ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'} flex flex-col md:flex-row items-start gap-4 hover:shadow-sm`}
+                      >
+                        <span className="px-3.5 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-mono font-bold shrink-0 self-start">
+                          {evt.year}
+                        </span>
+                        <div className="space-y-2">
+                          <h4 className="font-display font-extrabold text-sm sm:text-base leading-snug">{evt.title}</h4>
+                          <p className="text-xs text-gray-400">{evt.description}</p>
+                          <p className="text-xs text-gray-500/90 leading-relaxed font-sans">{evt.extendedExplanation}</p>
+                          <div className="p-3 bg-indigo-50/20 dark:bg-slate-800/20 rounded-xl text-[11px] text-indigo-600 dark:text-indigo-400 border border-dashed border-indigo-150 dark:border-slate-800">
+                            <strong>Curiosidade Curricular:</strong> {evt.curiosity}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 4. VIEW: OFICINA DO HISTORIADOR / FONTES */}
+              {activeTab === 'fontes' && (
+                <div className="space-y-6">
+                  <div className={`p-6 rounded-3xl border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'}`}>
+                    <h2 className="font-display font-black text-slate-800 dark:text-slate-100 text-xl tracking-tight">
+                      🔍 Oficina do Historiador - Fontes Históricas
+                    </h2>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Nesta oficina tu és o cientista da História! Examina vestígios, escreve as tuas notas e compara com a resposta esperada no currículo escolar.
+                    </p>
+                  </div>
+
+                  {HISTORICAL_SOURCES.map((source) => (
+                    <div 
+                      key={source.id}
+                      className={`p-6 rounded-3xl border space-y-4 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'}`}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 dark:border-slate-800 pb-3">
+                        <h3 className="font-display font-bold text-sm sm:text-base text-indigo-600">
+                          {source.title}
+                        </h3>
+                        <span className="text-[10px] font-mono font-bold text-gray-400 uppercase py-0.5 px-2 bg-gray-100 dark:bg-slate-800 rounded">
+                          {source.reference}
+                        </span>
+                      </div>
+
+                      {/* Display image description or text snippet */}
+                      {source.type === 'text' ? (
+                        <div className="p-4 bg-amber-500/5 border-l-4 border-amber-500 text-xs sm:text-sm text-gray-700 dark:text-gray-300 italic whitespace-pre-line leading-relaxed">
+                          "{source.contentHtml}"
+                        </div>
+                      ) : (
+                        <div className="p-5 border border-dashed border-gray-200 dark:border-slate-800 rounded-xl bg-gray-50 dark:bg-slate-950 flex flex-col items-center justify-center text-center gap-2">
+                          <span className="text-4xl">🏛️</span>
+                          <span className="text-[9px] font-mono tracking-wider text-indigo-600 uppercase font-extrabold">[ Reconstituição Arqueológica ]</span>
+                          <p className="text-xs text-gray-500 font-medium italic">"{source.visualAsset}"</p>
+                        </div>
+                      )}
+
+                      <p className="text-xs text-gray-400 leading-relaxed font-semibold">
+                        <strong>Comentário Académico:</strong> {source.description}
+                      </p>
+
+                      {/* Analysis Questions with textareas */}
+                      <div className="pt-4 border-t border-gray-100 dark:border-slate-850 space-y-4">
+                        <strong className="text-xs uppercase tracking-wider text-gray-400 block">Escreve o teu comentário crítico:</strong>
+                        
+                        {source.questions.map((q, qidx) => {
+                          const noteKey = `${source.id}-${qidx}`;
+                          const textValue = progress.analyzedSourcesNotes[noteKey] || '';
+                          const isRevealed = progress.gameScores[`fontes-shown-${noteKey}`] === 1;
+
+                          return (
+                            <div key={qidx} className="space-y-2">
+                              <p className="font-semibold text-xs sm:text-sm text-gray-750 dark:text-gray-350">{q}</p>
+                              <textarea
+                                rows={2}
+                                value={textValue}
+                                disabled={isRevealed}
+                                onChange={(e) => {
+                                  const text = e.target.value;
+                                  setProgress(prev => {
+                                    const notes = { ...prev.analyzedSourcesNotes, [noteKey]: text };
+                                    return { ...prev, analyzedSourcesNotes: notes };
+                                  });
+                                }}
+                                placeholder="Digita aqui a tua interpretação histórica da fonte..."
+                                className={`w-full p-3 rounded-xl border text-xs sm:text-sm outline-none ${darkMode ? 'bg-slate-800 border-slate-700 text-white focus:border-indigo-500' : 'bg-gray-50 border-gray-300 text-gray-800 focus:border-indigo-500'}`}
+                              />
+                              
+                              {!isRevealed ? (
+                                <button
+                                  type="button"
+                                  disabled={textValue.trim() === ''}
+                                  onClick={() => {
+                                    setProgress(prev => ({
+                                      ...prev,
+                                      gameScores: { ...prev.gameScores, [`fontes-shown-${noteKey}`]: 1 }
+                                    }));
+                                    addPoints(100, `Interpretação Crítica: ${source.title} q.${qidx+1}`);
+                                  }}
+                                  className="px-4 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-semibold rounded-lg transition-colors flex items-center gap-1.5"
+                                >
+                                  Verificar Resposta da Professora
+                                </button>
+                              ) : (
+                                <div className="p-3.5 rounded-xl border bg-green-500/10 border-green-505/20 space-y-1.5 text-xs">
+                                  <p className="font-bold text-green-700 dark:text-green-400">Resposta Esperada:</p>
+                                  <p className="italic text-gray-600 dark:text-gray-300">"{source.suggestedAnswers[qidx]}"</p>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* 5. VIEW: ARENA DE JOGOS */}
+              {activeTab === 'jogos' && (
+                <div className="space-y-6">
+                  {/* Matching Game Frame */}
+                  <div className={`p-6 rounded-3xl border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'} space-y-6`}>
+                    <div className="border-b border-gray-100 dark:border-slate-800 pb-3">
+                      <h3 className="font-display font-black text-indigo-600 text-base sm:text-lg flex items-center gap-1.5">
+                        🧩 Desafio de Correspondência de Vocabulário
+                      </h3>
+                      <p className="text-[11px] text-gray-400">Pensa rápido! Associa cada termo da esquerda ao seu significado correto na direita.</p>
+                    </div>
+
+                    {(() => {
+                      const initialTerms = [
+                        { id: 't1', term: 'Nomadismo', defId: 'd1', desc: 'Sobreviver da caça e recoleção deslocando-se constantemente sem residência fixa.' },
+                        { id: 't2', term: 'Megalitismo', defId: 'd2', desc: 'Monumento de enormes pedras no Neolítico p.ex. menires, dólmenes.' },
+                        { id: 't3', term: 'Vassalagem', defId: 'd3', desc: 'Relação de dependência mútua feudal entre suserano e suserano-vassalo.' },
+                        { id: 't4', term: 'Burguesia', defId: 'd4', desc: 'Classe urbana moderna que retirava riqueza da mercancia e capitais.' }
+                      ];
+
+                      // Simple localized single interaction states for match game
+                      const [termSelected, setTermSelected] = useState(null);
+                      const [defSelected, setDefSelected] = useState(null);
+                      const [matches, setMatches] = useState([]);
+
+                      const handleMatch = (tid, did) => {
+                        if (tid === did) {
+                          setMatches(prev => [...prev, tid]);
+                          addPoints(40, 'Acertou na associação de conceitos medievais!');
+                        }
+                        setTermSelected(null);
+                        setDefSelected(null);
+                      };
+
+                      return (
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Terms */}
+                            <div className="space-y-2">
+                              {initialTerms.map(t => {
+                                const isMatched = matches.includes(t.id);
+                                return (
+                                  <button
+                                    key={t.id}
+                                    type="button"
+                                    disabled={isMatched}
+                                    onClick={() => {
+                                      setTermSelected(t.id);
+                                      if (defSelected) handleMatch(t.id, defSelected);
+                                    }}
+                                    className={`w-full p-3 rounded-xl border text-xs sm:text-sm font-bold text-left transition-all ${isMatched ? 'border-green-500 bg-green-500/10 text-green-700 opacity-60' : termSelected === t.id ? 'border-indigo-650 bg-indigo-50 dark:bg-slate-800' : 'border-gray-200'}`}
+                                  >
+                                    {t.term} {isMatched && '✓'}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            {/* Definitions */}
+                            <div className="space-y-2">
+                              {initialTerms.map(t => {
+                                const isMatched = matches.includes(t.id);
+                                return (
+                                  <button
+                                    key={`def-${t.id}`}
+                                    type="button"
+                                    disabled={isMatched}
+                                    onClick={() => {
+                                      setDefSelected(t.id);
+                                      if (termSelected) handleMatch(termSelected, t.id);
+                                    }}
+                                    className={`w-full p-3.5 rounded-xl border text-xs text-left leading-relaxed transition-all ${isMatched ? 'border-green-500 bg-green-500/10 text-green-700 opacity-60' : defSelected === t.id ? 'border-indigo-650 bg-indigo-50 dark:bg-slate-800' : 'border-gray-200'}`}
+                                  >
+                                    {t.desc} {isMatched && '✓'}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                          {matches.length === initialTerms.length && (
+                            <div className="p-4 rounded-xl bg-green-500/10 text-center font-bold text-xs text-green-700">
+                              🎉 Parabéns! Dominas por completo todo o vocabulário e semântica de História!
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Escape Room / Castle Enigma Frame */}
+                  <div className={`p-6 rounded-3xl border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'} space-y-6`}>
+                    <div className="border-b border-gray-100 dark:border-slate-800 pb-3">
+                      <h3 className="font-display font-black text-emerald-600 text-base sm:text-lg flex items-center gap-1.5">
+                        🏰 Escape Room: Os Segredos do Castelo
+                      </h3>
+                      <p className="text-[11px] text-gray-400">Estás trancado no castelo da professora Carla Oliveira. Resolve o enigma heróico para escapar!</p>
+                    </div>
+
+                    {(() => {
+                      const [step, setStep] = useState(1);
+                      const [ans, setAns] = useState('');
+                      const [correct, setCorrect] = useState(false);
+
+                      const checkAns = () => {
+                        const word = ans.trim().toLowerCase();
+                        if (word.includes('mamede') || word.includes('são mamede') || word.includes('sao mamede')) {
+                          setCorrect(true);
+                          addPoints(150, 'Escapou com brilhantismo da masmorra medieval!');
+                        } else {
+                          addPoints(10, 'Tentou decifrar o enigma!');
+                        }
+                      };
+
+                      return (
+                        <div className="space-y-4">
+                          <div className="p-5 bg-emerald-500/5 rounded-2xl border border-dashed border-emerald-200 text-center space-y-3">
+                            <span className="text-4xl">🗝️</span>
+                            <p className="font-serif italic text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                              «O jovem herdeiro rebelde D. Afonso Henriques lutou contra o exército leonez de sua própria mãe e do conde galego em Guimarães, no ano de 1128, marcando o prelúdio da realeza. Em que célebre BATALHA militar triunfou o infante?»
+                            </p>
+                          </div>
+
+                          {!correct ? (
+                            <div className="space-y-3 max-w-sm mx-auto">
+                              <input
+                                type="text"
+                                value={ans}
+                                onChange={(e) => setAns(e.target.value)}
+                                placeholder="Batalha de Sã..."
+                                className={`w-full p-3 rounded-xl border text-center text-xs sm:text-sm outline-none ${darkMode ? 'bg-slate-800 border-slate-700 text-white focus:border-indigo-500' : 'bg-gray-50 border-gray-300 text-gray-800 focus:border-indigo-500'}`}
+                              />
+                              <button
+                                onClick={checkAns}
+                                className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold font-display text-xs"
+                              >
+                                Experimentar Chave de Prata
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="p-4 rounded-xl bg-green-500/10 text-xs text-center text-green-700 space-y-2">
+                              <p className="font-extrabold">🎉 Enigma Sólido Resolvido! Chave Desbloqueada.</p>
+                              <p className="italic">«A Batalha de São Mamede foi o verdadeiro prelúdio de soberania territorial de Portugal luso.»</p>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
+
+              {/* 6. VIEW: FINAL COMPREHENSIVE QUIZ */}
+              {activeTab === 'final' && (
+                <div className="space-y-6">
+                  <div className={`p-6 rounded-3xl border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'}`}>
+                    <h2 className="font-display font-black text-slate-800 dark:text-slate-100 text-xl tracking-tight">
+                      🏆 Avaliação Final Integradora Currículo
+                    </h2>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Testa os teus conhecimentos em todo o programa de História do 7.º ano. Supera 70% de sucesso para imprimires o teu Certificado assinado virtualmente pela Professora Carla Oliveira!
+                    </p>
+                  </div>
+
+                  {(() => {
+                    const finalQuestions = [
+                      { q: 'O nomadismo do Paleolítico significava:', opts: ['Ter habitação fixa.', 'Deslocar-se constantemente em busca de alimentos.', 'Votar democraticamente nas cortes.', 'Construir grandes menires funerários.'], cIdx: 1, exp: 'Os bandos dependiam exclusivamente dos recursos naturais.' },
+                      { q: 'Que importante Édito de 313 d.C. declarou a liberdade religiosa para cristãos em Roma?', opts: ['Édito de Tessalónica.', 'Tratado de Zamora.', 'Édito de Milão.', 'Código de César.'], cIdx: 2, exp: 'O Édito de Milão de Constantino pôs fim às perseguições.' },
+                      { q: 'Quem foi coroado o primeiro rei legítimo de Portugal na dinastia Borgonha?', opts: ['Conde D. Henrique.', 'D. Afonso Henriques.', 'D. Dinis o Poeta.', 'D. Fernando V.'], cIdx: 1, exp: 'Reconhecido rei em Zamora (1143) e pelo Papa (1179).' },
+                      { q: 'A Batalha de Aljubarrota em 1385 garantiu:', opts: ['A união territorial direta com Castela.', 'A integridade da soberania nacional do reino.', 'O início imediato do nomadismo arcaico.', 'O pagamento de dízimos à arquidiocese.'], cIdx: 1, exp: 'Evitou a anexação política e consolidou a dinastia de Avis.' }
+                    ];
+
+                    const [answers, setAnswers] = useState({});
+                    const [submitted, setSubmitted] = useState(false);
+
+                    const score = useMemo(() => {
+                      let correctCount = 0;
+                      finalQuestions.forEach((q, idx) => {
+                        if (answers[idx] === q.cIdx) correctCount++;
+                      });
+                      return Math.round((correctCount / finalQuestions.length) * 100);
+                    }, [answers]);
+
+                    return (
+                      <div className="space-y-6">
+                        {!submitted ? (
+                          <div className={`p-6 rounded-3xl border space-y-6 ${darkMode ? 'bg-slate-902 border-slate-800' : 'bg-white border-gray-200'}`}>
+                            {finalQuestions.map((q, idx) => (
+                              <div key={idx} className="space-y-2.5">
+                                <p className="font-semibold text-xs sm:text-sm text-gray-800 dark:text-white">{idx+1}. {q.q}</p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                  {q.opts.map((opt, oidx) => {
+                                    const isSelected = answers[idx] === oidx;
+                                    return (
+                                      <button
+                                        key={oidx}
+                                        type="button"
+                                        onClick={() => setAnswers(prev => ({ ...prev, [idx]: oidx }))}
+                                        className={`p-3 rounded-xl border text-left text-xs font-semibold transition-all ${isSelected ? 'border-indigo-600 bg-indigo-650/15' : 'border-gray-200'}`}
+                                      >
+                                        {opt}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            ))}
+
+                            <button
+                              onClick={() => {
+                                setSubmitted(true);
+                                setProgress(prev => ({
+                                  ...prev,
+                                  completedFinalQuiz: true,
+                                  finalQuizScore: score
+                                }));
+                                addPoints(200, 'Submeteu a Avaliação Integradora Final!');
+                              }}
+                              disabled={Object.keys(answers).length < finalQuestions.length}
+                              className="w-full py-3 bg-indigo-650 hover:bg-indigo-755 disabled:opacity-40 text-white font-semibold font-display text-xs rounded-xl shadow transition-all uppercase tracking-wider"
+                            >
+                              Submeter Exame Final de História
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="space-y-6">
+                            <div className={`p-6 rounded-3xl border text-center space-y-4 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'}`}>
+                              <span className="text-5xl">🏆</span>
+                              <h3 className="font-display font-black text-xl text-indigo-600">Exame Concluído!</h3>
+                              <p className="text-sm font-semibold">Tiveste uma taxa de sucesso de <strong>{score}%</strong>.</p>
+                              
+                              {score >= 70 ? (
+                                <div className="space-y-4">
+                                  <p className="text-xs text-green-600 font-bold">Parabéns! Passaste no teste da professa Carla Oliveira com sucesso.</p>
+                                  
+                                  {/* PRINT CERTIFICATE CARD */}
+                                  <div 
+                                    id="print-certificate"
+                                    className="p-8 border-8 border-double border-gray-300 dark:border-slate-850 rounded-2xl max-w-xl mx-auto space-y-6 bg-white text-gray-800 shadow-md relative"
+                                  >
+                                    <div className="text-center space-y-1">
+                                      <span className="text-4xl">📜</span>
+                                      <h1 className="font-display font-black text-lg sm:text-2xl tracking-tight text-gray-800">DIPLOMA DE HISTORIADOR</h1>
+                                      <p className="text-[10px] font-mono tracking-widest text-gray-400">7.º ANO DE ESCOLARIDADE • APRENDIZAGENS ESSENCIAIS</p>
+                                    </div>
+                                    <div className="space-y-3 font-serif">
+                                      <p className="text-xs text-center leading-relaxed">
+                                        Declara-se solenemente que o aluno(a) de excelência artística e científica
+                                      </p>
+                                      <h2 className="text-center font-display font-black text-xl border-b-2 border-dashed border-gray-300 pb-1 text-indigo-600">{progress.name || 'Aluno'}</h2>
+                                      <p className="text-xs text-center leading-relaxed">
+                                        completou com aproveitamento notável de <strong>{score}%</strong> a avaliação final, demonstrando pleno conhecimento da evolução humana, economia recoletora, império romano e fundação da nacionalidade de Portugal.
+                                      </p>
+                                    </div>
+                                    <div className="flex justify-between items-end border-t border-gray-100 pt-5 text-left text-[11px]">
+                                      <div>
+                                        <p className="font-bold">Profª Carla Oliveira</p>
+                                        <p className="text-gray-400 font-mono">Assinatura Digital</p>
+                                      </div>
+                                      <div className="text-right">
+                                        <p className="font-mono">Ponto {progress.points} XP</p>
+                                        <p className="text-gray-400 font-mono">Validação Automática</p>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <button
+                                    onClick={() => window.print()}
+                                    className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold flex items-center gap-1.5 mx-auto text-xs no-print"
+                                  >
+                                    Imprimir Diploma Curricular
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="space-y-3">
+                                  <p className="text-xs text-red-600 font-bold">Infelizmente não alcançaste o patamar mínimo de 70% para o diploma.</p>
+                                  <button
+                                    onClick={() => {
+                                      setSubmitted(false);
+                                      setAnswers({});
+                                    }}
+                                    className="px-5 py-2 rounded-xl bg-gray-200 dark:bg-slate-800 text-xs font-semibold"
+                                  >
+                                    Tentar Novamente
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* 7. VIEW: TEU PROGRESSO */}
+              {activeTab === 'progresso' && (
+                <div className="space-y-6">
+                  <div className={`p-6 rounded-3xl border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'}`}>
+                    <h2 className="font-display font-black text-slate-800 dark:text-slate-100 text-xl tracking-tight">
+                      🏆 Caderneta Escolar Digital de Progresso
+                    </h2>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Acompanha os teus pontos de Erudição, o teu nível e vê as tuas medalhas digitais desbloqueadas de acordo com as metas curriculares atingidas.
+                    </p>
+                  </div>
+
+                  {/* Badges Box Grid */}
+                  <div className="space-y-4">
+                    <h3 className="font-display font-bold text-xs uppercase tracking-wider text-indigo-500">
+                      🏅 Medalhas e Conquistas de Erudição Histórica
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {BADGES.map((badge) => {
+                        const isUnlocked = progress.points >= badge.unlockedAtPoints;
+                        return (
+                          <div 
+                            key={badge.id}
+                            className={`p-5 rounded-3xl border flex items-center gap-4 transition-all ${isUnlocked ? badge.className : 'opacity-40 bg-gray-100 dark:bg-slate-805 border-gray-200'}`}
+                          >
+                            <span className="text-4xl shrink-0">{badge.icon}</span>
+                            <div>
+                              <h4 className="font-display font-extrabold text-sm leading-tight text-gray-800 dark:text-white">{badge.title}</h4>
+                              <p className="text-[10px] text-gray-500 mt-1 leading-snug">{badge.description}</p>
+                              <span className="text-[9px] font-mono font-bold uppercase mt-1 block">
+                                {isUnlocked ? '✓ Desbloqueada' : `Meta: ${badge.unlockedAtPoints} XP`}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            </main>
+          </div>
+
+          {/* GLOBAL IN-PREVIEW FOOTER */}
+          <footer className={`border-t py-6 mt-16 px-4 text-center text-xs dark:text-slate-400 ${darkMode ? 'bg-slate-900 border-slate-800 text-gray-400' : 'bg-white border-gray-200 text-gray-500'}`}>
+            <p>História do 7.º Ano de Escolaridade • Disciplina sob direcção da Profª Carla Oliveira</p>
+            <p className="text-[10px] font-mono tracking-wide text-gray-400 mt-1">Concebido de acordo com as Aprendizagens Essenciais Curriculares Nacionais • Autónoma GitHub Pages</p>
+          </footer>
+
+        </div>
+      );
+    }
+
+    // --- RENDER APP IN PREVIEW ---
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
